@@ -18,8 +18,12 @@ jobs:
           RCLONE_CONFIG_DRIVE_TYPE: drive
           RCLONE_CONFIG_DRIVE_SCOPE: drive
           RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          
+          # 【關鍵修正 1】用專屬變數強制把空間算在你的 Google 帳號上，避開服務帳戶 0 GB 的問題
+          RCLONE_DRIVE_UPLOAD_CUTOFF: "0"
+          
+          # 【關鍵修正 2】用正式變數徹底封鎖 .git 資料夾，不讓它有機會上傳
+          RCLONE_EXCLUDE: "/.git/**"
         with:
-          # 1. 加上 --drive-acknowledge-abuse 和 ignore-checksum 穩定傳輸
-          # 2. 關鍵核心：加上 --exclude "/.git/**" 忽略 git 歷史檔案
-          # 3. 關鍵核心：加上 --drive-upload-cutoff 0 強制把空間算在擁有者（你）的帳號，不佔用服務帳戶额度
-          args: sync . drive:${{ secrets.GDRIVE_FOLDER_ID }} --exclude "/.git/**" --drive-upload-cutoff 0
+          # 將 args 保持最純粹的狀態，避免引號解析失敗
+          args: sync . drive:${{ secrets.GDRIVE_FOLDER_ID }}
