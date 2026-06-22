@@ -1,0 +1,22 @@
+name: Sync to Google Drive
+
+on:
+  push:
+    branches:
+      - main # 當您提交到 main 分支時會自動觸發
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Sync to Google Drive via Rclone
+        uses: wei/rclone@v1
+        env:
+          RCLONE_CONFIG_DRIVE_TYPE: drive
+          RCLONE_CONFIG_DRIVE_SCOPE: drive
+          RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_BLANK_KEY: ${{ secrets.GDRIVE_CREDENTIALS }}
+        with:
+          args: sync . drive:${{ secrets.GDRIVE_FOLDER_ID }}
