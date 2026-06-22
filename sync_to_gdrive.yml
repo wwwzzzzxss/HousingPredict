@@ -3,19 +3,23 @@ name: Sync to Google Drive
 on:
   push:
     branches:
-      - main # 當 main 分支有 push 時觸發
+      - main
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Upload to Google Drive
-        uses: adityassarkar/gdrive-upload-action@v2 # 使用現成的 GitHub Action 套件
+      - name: Sync to Google Drive via Rclone
+        uses: wei/rclone@v1
+        env:
+          RCLONE_CONFIG_DRIVE_TYPE: drive
+          RCLONE_CONFIG_DRIVE_SCOPE: drive
+          RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
         with:
-          credentials: ${{ secrets.GDRIVE_CREDENTIALS }}
-          folderId: ${{ secrets.GDRIVE_FOLDER_ID }}
-          filename: '.' # 同步整個資料夾，或指定特定檔案
-          overwrite: true
+          # 1. 加上 --drive-acknowledge-abuse 和 ignore-checksum 穩定傳輸
+          # 2. 關鍵核心：加上 --exclude "/.git/**" 忽略 git 歷史檔案
+          # 3. 關鍵核心：加上 --drive-upload-cutoff 0 強制把空間算在擁有者（你）的帳號，不佔用服務帳戶额度
+          args: sync . drive:${{ secrets.GDRIVE_FOLDER_ID }} --exclude "/.git/**" --drive-upload-cutoff 0
