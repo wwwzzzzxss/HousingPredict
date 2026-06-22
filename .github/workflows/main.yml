@@ -12,18 +12,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Create Rclone Config File
-        run: |
-          # 校正路徑，直接把設定檔建立在 Docker 容器對應的 /github/home 目錄下
-          mkdir -p /home/runner/work/_temp/_github_home/.config/rclone
-          cat << 'EOF' > /home/runner/work/_temp/_github_home/.config/rclone/rclone.conf
-          [drive]
-          type = drive
-          scope = drive
-          service_account_credentials = ${{ secrets.GDRIVE_CREDENTIALS }}
-          EOF
-
       - name: Sync to Google Drive via Rclone
         uses: wei/rclone@v1
+        env:
+          RCLONE_CONFIG_DRIVE_TYPE: drive
+          RCLONE_CONFIG_DRIVE_SCOPE: drive
+          # 關鍵：直接將 JSON 內容轉成單行環境變數餵給 Rclone
+          RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
         with:
           args: sync . drive:${{ secrets.GDRIVE_FOLDER_ID }}
