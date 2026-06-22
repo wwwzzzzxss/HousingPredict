@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch: # 👉 就是這一行！它會把「手動執行按鈕」召喚出來
 
 jobs:
   sync:
@@ -17,7 +18,13 @@ jobs:
         env:
           RCLONE_CONFIG_DRIVE_TYPE: drive
           RCLONE_CONFIG_DRIVE_SCOPE: drive
-          # 關鍵：直接將 JSON 內容轉成單行環境變數餵給 Rclone
-          RCLONE_CONFIG_DRIVE_SERVICE_ACCOUNT_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
+          # 使用您的個人專屬授權碼 JSON
+          RCLONE_CONFIG_DRIVE_TOKEN: ${{ secrets.GDRIVE_CREDENTIALS }}
+          
+          # 空間容量算在您自己頭上
+          RCLONE_DRIVE_UPLOAD_CUTOFF: "0"
+          
+          # 徹底封鎖 .git 歷史紀錄檔
+          RCLONE_EXCLUDE: "/.git/**"
         with:
           args: sync . drive:${{ secrets.GDRIVE_FOLDER_ID }}
