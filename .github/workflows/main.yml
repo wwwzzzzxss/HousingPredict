@@ -14,8 +14,9 @@ jobs:
 
       - name: Create Rclone Config File
         run: |
-          mkdir -p ~/.config/rclone
-          cat << 'EOF' > ~/.config/rclone/rclone.conf
+          # 校正路徑，直接把設定檔建立在 Docker 容器對應的 /github/home 目錄下
+          mkdir -p /home/runner/work/_temp/_github_home/.config/rclone
+          cat << 'EOF' > /home/runner/work/_temp/_github_home/.config/rclone/rclone.conf
           [drive]
           type = drive
           scope = drive
